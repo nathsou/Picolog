@@ -68,8 +68,8 @@ const unifyMany = (
         if (isVar(s)) { // eliminate
             if (occurs(s, t)) return None;
 
-            if (sig[s] !== undefined) {
-                eqs.push([t, sig[s]]); // handle non-linear terms
+            if (sig[s] !== undefined) { // handle non-linear terms
+                if (!termsEq(t, sig[s])) return None;
                 continue;
             } else {
                 sig[s] = t;

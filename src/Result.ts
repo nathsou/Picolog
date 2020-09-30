@@ -1,11 +1,11 @@
 export type Result<T, E> = Ok<T> | Error<E>;
-export type Ok<T> = { type: "ok"; value: T };
-export type Error<E> = { type: "error"; value: E };
+export type Ok<T> = { type: "ok", value: T };
+export type Error<E> = { type: "error", value: E };
 
 export const ok = <T>(value: T): Ok<T> => ({ type: "ok", value });
 export const error = <E>(value: E): Error<E> => ({
     type: "error",
-    value,
+    value
 });
 
 export const isOk = <T, E>(res: Result<T, E>): res is Ok<T> =>
@@ -14,17 +14,6 @@ export const isOk = <T, E>(res: Result<T, E>): res is Ok<T> =>
 export const isError = <T, E>(res: Result<T, E>): res is Error<E> =>
     res.type === "error";
 
-export const mapEither = <T, E, A>(
-    res: Result<T, E>,
-    whenOk: (val: T) => A,
-    whenError: (val: E) => A,
-): A => {
-    if (isOk(res)) {
-        return whenOk(res.value);
-    } else {
-        return whenError(res.value);
-    }
-};
 
 // bind for the Result Monad
 export const bind = <A, B, E>(res: Result<A, E>, f: (val: A) => Result<B, E>): Result<B, E> => {

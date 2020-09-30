@@ -36,25 +36,6 @@ export function renameVars(t: Term, suffix: string): Term {
     if (isVar(t)) return `${t}_${suffix}`;
     return funOf(
         t.name,
-        t.args.map((arg) => renameVars(arg, suffix))
+        t.args.map(arg => renameVars(arg, suffix))
     );
 }
-
-export const renameProg = (prog: Prog): Prog => {
-    const newProg: Prog = new Map();
-
-    for (const [f, rules] of prog.entries()) {
-        newProg.set(
-            f,
-            rules.map(([head, body], idx) => {
-                const suffix = `${f}${idx}`;
-                return ruleOf(
-                    renameVars(head, suffix),
-                    body.map(a => renameVars(a, suffix))
-                );
-            })
-        );
-    }
-
-    return newProg;
-};

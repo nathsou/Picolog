@@ -2,8 +2,8 @@
 last(X, [X]).
 last(X, [_|TL]) :- last(X, TL).
 
-length(0, []).
-length(s(L), [_|TL]) :- length(L, TL).
+% length(0, []).
+% length(s(L), [_|TL]) :- length(L, TL).
 
 second_to_last(X, [X|[_]]).
 second_to_last(X, [_|TL]) :- second_to_last(X, TL).
@@ -17,3 +17,11 @@ reverse(R, L) :- reverse(R, L, []).
 
 member(X, [X|_]).
 member(X, [_|TL]) :- member(X, TL).
+
+palindrome(L) :- reverse(L, L).
+
+is_list([]).
+is_list([_|T]) :- is_list(T).
+
+append([], Bs, Bs).
+append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).

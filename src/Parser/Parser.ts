@@ -1,5 +1,5 @@
 import { isSome, Maybe } from "../Maybe.ts";
-import { bind, error, isError, isOk, ok, Result, mapResult as mapResults } from "../Result.ts";
+import { bind, error, isError, isOk, ok, Result, mapResult } from "../Result.ts";
 import { groupByHead, Rule, ruleOf } from "../Rule.ts";
 import { Fun, funOf, Term, varOf } from "../Term.ts";
 import { lex, LexerError } from "./Lexer.ts";
@@ -23,11 +23,11 @@ const current = ({ tokens, pos }: ParserState): Maybe<Token> => {
     return tokens[pos];
 };
 
-export const then = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> => state => {
+const then = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> => state => {
     return bind(a(state), resA => bind(b(state), resB => ok([resA, resB])));
 };
 
-export const alt = <T>(a: Parser<T>, b: Parser<T>): Parser<T> => state => {
+const alt = <T>(a: Parser<T>, b: Parser<T>): Parser<T> => state => {
     const { pos } = state;
     const resA = a(state);
     if (isOk(resA)) {
@@ -38,7 +38,7 @@ export const alt = <T>(a: Parser<T>, b: Parser<T>): Parser<T> => state => {
     return b(state);
 };
 
-export const mapParser = <A, B>(p: Parser<A>, f: (v: A) => B): Parser<B> => {
+const map = <A, B>(p: Parser<A>, f: (v: A) => B): Parser<B> => {
     return state => bind(p(state), v => ok(f(v)));
 };
 
@@ -77,11 +77,11 @@ const token = (type: Token["type"]): Parser<Token> => {
 
 // parses a value surrounded by parentheses
 const parens = <T>(p: Parser<T>): Parser<T> => {
-    return mapParser(then(token('lparen'), then(p, token('rparen'))), ([_l, [res, _r]]) => res);
+    return map(then(token('lparen'), then(p, token('rparen'))), ([_l, [res, _r]]) => res);
 };
 
 const brackets = <T>(p: Parser<T>): Parser<T> => {
-    return mapParser(then(token('lbracket'), then(p, token('rbracket'))), ([_l, [res, _r]]) => res);
+    return map(then(token('lbracket'), then(p, token('rbracket'))), ([_l, [res, _r]]) => res);
 };
 
 // parses a list of values separated by commas
@@ -118,10 +118,10 @@ const termOfList = (ts: Term[], lastElemIsTail = false): Term => {
 
 export const list: Parser<Term> = alt(
     alt(
-        mapParser(then(token('lbracket'), token('rbracket')), () => funOf('nil')),
-        mapParser(brackets(commas(term)), termOfList),
+        map(then(token('lbracket'), token('rbracket')), () => funOf('nil')),
+        map(brackets(commas(term)), termOfList),
     ),
-    mapParser(brackets(then(commas(term), then(token('pipe'), term))), ([xs, [_, tl]]) => termOfList([...xs, tl], true)),
+    map(brackets(then(commas(term), then(token('pipe'), term))), ([xs, [_, tl]]) => termOfList([...xs, tl], true)),
 );
 
 export function term(state: ParserState): Result<Term, ParserError> {
@@ -146,7 +146,7 @@ export const functor: Parser<Fun> = state => {
             return ok(funOf(f));
         } else {
             // compound term
-            return mapParser(parens(commas(term)), args => funOf(f, args))(state);
+            return map(parens(commas(term)), args => funOf(f, args))(state);
         }
     }
 
@@ -173,16 +173,16 @@ export const rule: Parser<Rule> = state =>
 
 export const rules = many(rule);
 
-export const program = mapParser(rules, groupByHead);
+export const program = map(rules, groupByHead);
 
 // a query is a comma-separated list of functors followed by a dot
-export const query: Parser<Fun[]> = mapParser(then(commas(functor), token('dot')), ([qs, _]) => qs);
+export const query: Parser<Fun[]> = map(then(commas(functor), token('dot')), ([qs, _]) => qs);
 
 export const parse = <T>(
     input: string,
     parser: Parser<T>
 ): Result<T, ParserError | LexerError> => {
-    return bind(mapResults([...lex(input)], x => x), tokens => {
+    return bind(mapResult([...lex(input)], x => x), tokens => {
         const state = { tokens, pos: 0 };
         const res = parser(state);
         if (state.pos !== state.tokens.length) {
