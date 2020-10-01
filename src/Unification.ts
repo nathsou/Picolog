@@ -29,11 +29,11 @@ export const substituteMut = (t: Term, sig: Subst): Term => {
     return t;
 };
 
+export function substitute(x: Var, sig: Subst): Term;
+export function substitute(f: Fun, sig: Subst): Fun;
 /**
  * replaces variables by their bound value in sig if any
  */
-export function substitute(x: Var, sig: Subst): Term;
-export function substitute(f: Fun, sig: Subst): Fun;
 export function substitute(t: Term, sig: Subst): Term;
 export function substitute(
     t: Term,

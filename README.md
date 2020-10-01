@@ -5,11 +5,15 @@
 Picolog provides a minimal prolog
 interpreter implementation that can be embedded in other js/ts/node/deno projects to perform logical computations.
 
+### Installation
+
+Picolog is available on deno.land at https://deno.land/x/pico
+
 ### Usage
 
 To launch the REPL:
 ```bash
-$ deno run --allow-read --allow-env --unstable repl/Repl.ts src.pl
+$ deno run --allow-read --allow-env --unstable https://deno.land/x/pico@0.0.1/repl/Repl.ts src.pl
 ```
 the --unstable flag is needed since Deno.setRaw (used by the REPL) is a new API.
 
@@ -37,20 +41,20 @@ if (isOk(prog) && isOk(goals)) {
         // to values satisfying the rules
         console.log(formatComputedAnswer(answer));
     }
-
-    // output:
-    // A = []
-    // B = [1, 2, 3]
-
-    // A = [1]
-    // B = [2, 3]
-
-    // A = [1, 2]
-    // B = [3]
-
-    // A = [1, 2, 3]
-    // B = []
 }
+
+// output:
+// A = []
+// B = [1, 2, 3]
+
+// A = [1]
+// B = [2, 3]
+
+// A = [1, 2]
+// B = [3]
+
+// A = [1, 2, 3]
+// B = []
 ```
 
 ### Todo

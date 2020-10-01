@@ -143,6 +143,20 @@ const commas = <T>(p: Parser<T>): Parser<T[]> => {
     };
 };
 
+/**
+ * parses a prolog term, can be used with the `parse` function
+ */
+export const term = (state: ParserState): Result<Term, ParserError> => {
+    const tok = current(state);
+
+    if (tok?.type === "variable") {
+        advance(state);
+        return ok(varOf(tok.name));
+    }
+
+    return alt(functor, list)(state);
+};
+
 // desugar lists
 const termOfList = (ts: Term[], lastElemIsTail = false): Term => {
     if (ts.length === 0) return funOf('nil');
@@ -157,20 +171,6 @@ const list: Parser<Term> = alt(
     ),
     map(brackets(then(commas(term), then(token('pipe'), term))), ([xs, [_, tl]]) => termOfList([...xs, tl], true)),
 );
-
-/**
- * parses a prolog term, can be used with the `parse` function
- */
-export function term(state: ParserState): Result<Term, ParserError> {
-    const tok = current(state);
-
-    if (tok?.type === "variable") {
-        advance(state);
-        return ok(varOf(tok.name));
-    }
-
-    return alt(functor, list)(state);
-}
 
 /**
  * parses a prolog non-variable term, can be used with the `parse` function

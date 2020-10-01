@@ -2,7 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.71.0/testing/asserts.ts";
 import { parse, program, query } from "../src/Parser/Parser.ts";
 import { formatComputedAnswer, resolve } from "../src/Resolution.ts";
 import { okOrThrow } from "../src/Result.ts";
-import { Prog } from "../src/Rule.ts";
+import type { Prog } from "../src/Rule.ts";
 import { Fun, funOf, showTerm } from "../src/Term.ts";
 
 const take = <T>(count: number, it: Iterable<T>): T[] => {
