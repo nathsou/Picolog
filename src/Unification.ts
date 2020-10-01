@@ -1,8 +1,16 @@
 import { Maybe, None } from "./Maybe.ts";
 import { Fun, funOf, isVar, showTerm, Term, termsEq, Var } from "./Term.ts";
 
+/**
+ * a type to represent substitutions
+ * i.e. mappings/bindings between variable names and terms
+ */
 export type Subst = { [key: string]: Term };
 
+/**
+ * replaces variables by their bound value in sig if any
+ * mutates the arguments of compound terms in place
+ */
 export const substituteMut = (t: Term, sig: Subst): Term => {
     if (isVar(t)) {
         if (sig[t] !== undefined) {
@@ -21,6 +29,9 @@ export const substituteMut = (t: Term, sig: Subst): Term => {
     return t;
 };
 
+/**
+ * replaces variables by their bound value in sig if any
+ */
 export function substitute(x: Var, sig: Subst): Term;
 export function substitute(f: Fun, sig: Subst): Fun;
 export function substitute(t: Term, sig: Subst): Term;
@@ -30,7 +41,7 @@ export function substitute(
 ): Term {
     if (isVar(t)) {
         if (sig[t] !== undefined) {
-            const t_ = substituteMut(sig[t], sig);
+            const t_ = substitute(sig[t], sig);
             sig[t] = t_;
             return t_;
         } else {
@@ -41,16 +52,29 @@ export function substitute(
     return funOf(t.name, t.args.map(t => substitute(t, sig)));
 }
 
+/**
+ * formats a substitution to a string
+ */
 export const showSubst = (sig: Subst): string => {
     return `{ ${Object.entries(sig).map(([x, t]) => `${x} -> ${showTerm(t)}`).join(", ")
         } }`;
 };
 
+/**
+ * checks wether x occurs in t
+ * used to determine if a term definition is recursive
+ * and therefore not unifiable
+ */
 const occurs = (x: Var, t: Term): boolean => {
     if (isVar(t)) return x === t;
     return t.args.some(arg => occurs(x, arg));
 };
 
+/**
+ * tries to find a substitution σ such that σ(s) = σ(t)
+ * where '=' denotes syntactical equality
+ * as defined by `termsEq`
+ */
 export const unify = (s: Term, t: Term): Maybe<Subst> => unifyMany([[s, t]]);
 
 // iterative version of Martelli & Montanari's unification procedure
@@ -103,6 +127,10 @@ const unifyMany = (
     return sig;
 };
 
+/**
+ * checks wether two substitutions are equal
+ * i.e. both have the same bindings
+ */
 export const substEq = (a: Subst, b: Subst): boolean => {
     const as = Object.keys(a);
     const bs = Object.keys(b);

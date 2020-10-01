@@ -26,7 +26,7 @@ const prog = parse(`
     append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).
 `, program);
 
-const goals = parse('append(A, [4, 5, 6], [1, 2, 3, 4, 5, 6]).', query);
+const goals = parse('append(A, B, [1, 2, 3]).', query);
 
 if (isOk(prog) && isOk(goals)) {
     // iterator of all solutions
@@ -37,8 +37,19 @@ if (isOk(prog) && isOk(goals)) {
         // to values satisfying the rules
         console.log(formatComputedAnswer(answer));
     }
+
     // output:
+    // A = []
+    // B = [1, 2, 3]
+
+    // A = [1]
+    // B = [2, 3]
+
+    // A = [1, 2]
+    // B = [3]
+
     // A = [1, 2, 3]
+    // B = []
 }
 ```
 

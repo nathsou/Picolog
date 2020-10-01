@@ -84,6 +84,7 @@ export class TTYManager {
             switch (keypress.key) {
                 case 'c':
                     Deno.exit();
+                    break; // linter
                 case 'l':
                     await clearScreen();
                     await goTo(this.text.length + this.prefix.length - this.xOffset, 0);
@@ -138,7 +139,7 @@ export class TTYManager {
             if (isSome(res)) {
                 await nextLine();
                 return res;
-            };
+            }
         }
 
         return '';

@@ -5,11 +5,27 @@ import { Fun, funOf, Term, varOf } from "../Term.ts";
 import { lex, LexerError } from "./Lexer.ts";
 import { showPosition, showToken, Token } from "./Token.ts";
 
+/**
+ * type returned when parsing is unsuccessful
+ */
 export type ParserError = string;
-// parsers are separated so that they can be used individually
-// not pure functions, the state is mutated
+
+/**
+ * A parser is a function attempting to match a pattern in
+ * the tokens given as input
+ * 
+ * parsers are not pure functions, the state's current token
+ * position is mutated
+ * @param T the type returned when parsing is successfull
+ */
 export type Parser<T> = (state: ParserState) => Result<T, ParserError>;
 
+/**
+ * the state used by parsers
+ * it consists of an immutable array of tokens
+ * along with a mutable index indicating
+ * the current position into that array
+ */
 interface ParserState {
     readonly tokens: Token[];
     pos: number;
@@ -55,6 +71,10 @@ const many = <T>(p: Parser<T>): Parser<T[]> => state => {
     return ok(values);
 };
 
+/**
+ * formats a token for debugging
+ * @param t the token to format
+ */
 export const formatToken = (t: Maybe<Token>): string => {
     if (isSome(t)) {
         return `'${showToken(t)}' at ${showPosition(t)}`;
@@ -63,7 +83,11 @@ export const formatToken = (t: Maybe<Token>): string => {
     return 'invalid token';
 };
 
-const token = (type: Token["type"]): Parser<Token> => {
+/**
+ * parses a single token of the specified type
+ * @param type the type of token to be parsed
+ */
+const token = (type: Token['type']): Parser<Token> => {
     return state => {
         const tok = current(state);
         if (tok?.type === type) {
@@ -75,16 +99,26 @@ const token = (type: Token["type"]): Parser<Token> => {
     };
 };
 
-// parses a value surrounded by parentheses
+/**
+ * parses a value surrounded by parentheses
+ * @param p the parser matching the value between the parentheses
+ */
 const parens = <T>(p: Parser<T>): Parser<T> => {
     return map(then(token('lparen'), then(p, token('rparen'))), ([_l, [res, _r]]) => res);
 };
 
+/**
+ * parses a value surrounded by square brackets
+ * @param p the parser matching the value between the square brackets
+ */
 const brackets = <T>(p: Parser<T>): Parser<T> => {
     return map(then(token('lbracket'), then(p, token('rbracket'))), ([_l, [res, _r]]) => res);
 };
 
-// parses a list of values separated by commas
+/**
+ * parses a list of values separated by commas
+ * @param p the parser matching comma separated values
+ */
 const commas = <T>(p: Parser<T>): Parser<T[]> => {
     return state => {
         const values: T[] = [];
@@ -116,7 +150,7 @@ const termOfList = (ts: Term[], lastElemIsTail = false): Term => {
     return funOf('.', [ts[0], termOfList(ts.slice(1), lastElemIsTail)]);
 };
 
-export const list: Parser<Term> = alt(
+const list: Parser<Term> = alt(
     alt(
         map(then(token('lbracket'), token('rbracket')), () => funOf('nil')),
         map(brackets(commas(term)), termOfList),
@@ -124,6 +158,9 @@ export const list: Parser<Term> = alt(
     map(brackets(then(commas(term), then(token('pipe'), term))), ([xs, [_, tl]]) => termOfList([...xs, tl], true)),
 );
 
+/**
+ * parses a prolog term, can be used with the `parse` function
+ */
 export function term(state: ParserState): Result<Term, ParserError> {
     const tok = current(state);
 
@@ -135,6 +172,9 @@ export function term(state: ParserState): Result<Term, ParserError> {
     return alt(functor, list)(state);
 }
 
+/**
+ * parses a prolog non-variable term, can be used with the `parse` function
+ */
 export const functor: Parser<Fun> = state => {
     const tok = current(state);
 
@@ -153,11 +193,9 @@ export const functor: Parser<Fun> = state => {
     return error(`expected a functor, got ${formatToken(current(state))}`);
 };
 
-// export const rule2: Parser<Rule> = alt(
-//     map(then(functor, then(token('leftarrow'), then(commas(term), token('dot')))), ([head, [_a, [args, _d]]]) => ruleOf(head, args)),
-//     map(then(functor, token('dot')), ([head, _]) => ruleOf(head, []))
-// );
-
+/**
+ * parses a prolog rule, can be used with the `parse` function
+ */
 export const rule: Parser<Rule> = state =>
     bind(functor(state), (head) => {
         if (current(state)?.type === "leftarrow") {
@@ -171,13 +209,29 @@ export const rule: Parser<Rule> = state =>
         }
     });
 
+/**
+ * parses a list of rules 
+ */
 export const rules = many(rule);
 
+/**
+ * parses a prolog program
+ */
 export const program = map(rules, groupByHead);
 
-// a query is a comma-separated list of functors followed by a dot
+/**
+ * parses a prolog query, can be used with the `parse` function
+ * a query is a comma-separated list of functors followed by a dot
+ */
 export const query: Parser<Fun[]> = map(then(commas(functor), token('dot')), ([qs, _]) => qs);
 
+/**
+ * utility function to parse an input string with the given parser
+ * it handles the tokenization and the creation of an internal state
+ * and attempts to process the entire input
+ * @param input the string to parse
+ * @param parser the parser to use
+ */
 export const parse = <T>(
     input: string,
     parser: Parser<T>

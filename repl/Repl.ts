@@ -53,7 +53,7 @@ const repl = async (prog: Prog): Promise<void> => {
 };
 
 const enterRepl = (path: string): void => {
-    const contents = new TextDecoder("utf-8").decode(Deno.readFileSync(path));
+    const contents = new TextDecoder('utf-8').decode(Deno.readFileSync(path));
     const prog = okOrThrow(parseProg(contents));
     repl(prog);
 };

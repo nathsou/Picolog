@@ -20,7 +20,7 @@ export type Position = {
     column: number;
 };
 
-type WithPosition<Name extends string, T = {}> = Position & { type: Name } & T;
+type WithPosition<Name extends string, T = Record<string, unknown>> = Position & { type: Name } & T;
 
 type LeftParen = WithPosition<"lparen">;
 type RightParen = WithPosition<"rparen">;

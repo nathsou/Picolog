@@ -96,4 +96,4 @@ export function* lex(input: string): Iterable<Result<Token, LexerError>> {
         yield error(`Unrecognized token near "${input.substr(offset, 10)}", at ${showPosition(pos)}`);
         return;
     }
-};
+}
