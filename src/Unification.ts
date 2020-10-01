@@ -8,7 +8,7 @@ import { Fun, funOf, isVar, showTerm, Term, termsEq, Var } from "./Term.ts";
 export type Subst = { [key: string]: Term };
 
 /**
- * replaces variables by their bound value in sig if any
+ * replaces variables by their bound value in sig if any,
  * mutates the arguments of compound terms in place
  */
 export const substituteMut = (t: Term, sig: Subst): Term => {
@@ -84,6 +84,7 @@ const unifyMany = (
     const sig: Subst = {};
 
     while (eqs.length > 0) {
+        // console.log('\n' + eqs.map(([a, b]) => `${showTerm(a)} = ${showTerm(b)}`).join(', '));
         const [s, t] = eqs.pop() as [Term, Term];
 
         // only possible if s and t are variables
@@ -93,7 +94,7 @@ const unifyMany = (
             if (occurs(s, t)) return None;
 
             if (sig[s] !== undefined) { // handle non-linear terms
-                if (!termsEq(t, sig[s])) return None;
+                eqs.push([t, sig[s]]);
                 continue;
             } else {
                 sig[s] = t;

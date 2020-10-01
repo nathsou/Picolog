@@ -74,7 +74,7 @@ Deno.test('reverse', () => {
 
     const tests: Array<[string, string[]]> = [
         ['reverse(R, [1, 2, 3]).', ['R = [3, 2, 1]']],
-        // ['reverse([1, 2, 3], R).', ['R = [3, 2, 1]']], // for some reason this stalls
+        ['reverse([1, 2, 3], R).', ['R = [3, 2, 1]']],
         ['reverse([], []).', ['true.']],
         ['reverse([7, 8, 9], [9, 7, 8]).', ['false.']],
     ];

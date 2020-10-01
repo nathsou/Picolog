@@ -1,20 +1,18 @@
-import { parse, ParserError, query, rules } from "../src/Parser/Parser.ts";
+import type { LexerError } from "../src/Parser/Lexer.ts";
+import { parse, ParserError, program, query } from "../src/Parser/Parser.ts";
 import { formatComputedAnswer, resolve } from "../src/Resolution.ts";
-import { bind, isError, ok, okOrThrow, Result } from "../src/Result.ts";
-import { groupByHead, Prog } from "../src/Rule.ts";
+import { isError, okOrThrow, Result } from "../src/Result.ts";
+import type { Prog } from "../src/Rule.ts";
 import type { Fun } from "../src/Term.ts";
 import { TTYManager } from "./TTYManager.ts";
 
 const printUsage = () => {
-    console.info(`usage: picolog src.pl`);
+    console.info(`usage: picolog src.pl [query]`);
     Deno.exit();
 };
 
-const parseProg = (src: string): Result<Prog, ParserError> => {
-    return bind(parse(src, rules), rs => ok(groupByHead(rs)));
-};
-
 const parseQuery = (q: string): Result<Fun[], ParserError> => parse(q, query);
+
 
 async function writeln(msg: string): Promise<void> {
     await Deno.write(Deno.stdin.rid, new TextEncoder().encode(msg + '\n'));
@@ -37,7 +35,7 @@ const repl = async (prog: Prog): Promise<void> => {
         while (!next.done) {
             foundAnswer = true;
             const out = formatComputedAnswer(next.value);
-            await writeln(out + '\n');
+            await writeln(out);
             if (out === 'true.') break;
 
             // look for more answers
@@ -52,15 +50,36 @@ const repl = async (prog: Prog): Promise<void> => {
     }
 };
 
-const enterRepl = (path: string): void => {
+const parseProgram = (path: string): Result<Prog, ParserError | LexerError> => {
     const contents = new TextDecoder('utf-8').decode(Deno.readFileSync(path));
-    const prog = okOrThrow(parseProg(contents));
-    repl(prog);
+    return parse(contents, program);
 };
 
-if (Deno.args.length !== 1) {
-    printUsage();
-} else {
-    const [path] = Deno.args;
-    enterRepl(path);
+const enterRepl = (path: string): void => {
+    repl(okOrThrow(parseProgram(path)));
+};
+
+const runQuery = (path: string, query: string): void => {
+    const prog = okOrThrow(parseProgram(path));
+    const q = okOrThrow(parseQuery(query));
+    const solutions = resolve(prog, q)[Symbol.iterator]();
+    console.log(formatComputedAnswer(solutions.next().value));
+};
+
+switch (Deno.args.length) {
+    case 1:
+        {
+            const [path] = Deno.args;
+            enterRepl(path);
+            break;
+        }
+    case 2:
+        {
+            const [path, query] = Deno.args;
+            runQuery(path, query);
+            break;
+        }
+    default:
+        printUsage();
+        break;
 }

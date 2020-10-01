@@ -25,3 +25,9 @@ is_list([_|T]) :- is_list(T).
 
 append([], Bs, Bs).
 append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).
+
+
+flatten(X, [X]).
+flatten([], []).
+flatten([As|Bs], Flat) :- flatten(As, As2), flatten(Bs, Bs2), append(As2, Bs2, Flat).
+% flatten([X|Xs],Zs) :- flatten(X,Y), flatten(Xs,Ys), append(Y,Ys,Zs).

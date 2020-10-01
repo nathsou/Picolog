@@ -121,3 +121,14 @@ export const termsEq = (s: Term, t: Term): boolean => {
 
 	return s === t;
 };
+
+export function cloneTerm(x: Var): Var;
+export function cloneTerm(f: Fun): Fun;
+export function cloneTerm(t: Term): Term;
+/**
+ * creates a new copy of t
+ */
+export function cloneTerm(t: Term): Term {
+	if (isVar(t)) return t;
+	return funOf(t.name, t.args.map(cloneTerm));
+}

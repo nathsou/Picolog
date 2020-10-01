@@ -1,6 +1,6 @@
 import type { Maybe } from "./Maybe.ts";
 import { Prog, renameVars, Rule } from "./Rule.ts";
-import type { Fun } from './Term.ts';
+import { cloneTerm, Fun } from './Term.ts';
 import { showTerm, vars } from "./Term.ts";
 import {
     Subst,
@@ -11,9 +11,9 @@ import {
 } from "./Unification.ts";
 
 type Choice = {
-    goals: Fun[];
-    nextRuleIndex: number;
-    depth: number;
+    goals: Fun[],
+    nextRuleIndex: number,
+    unifiersCount: number
 };
 
 type MatchingRule = {
@@ -63,7 +63,7 @@ const resolveNext = (
     prog: Prog,
     goals: Fun[],
     nextRuleIndex: number,
-    stack: Choice[],
+    choices: Choice[],
     unifiers: Subst[],
     traceMode = false
 ): boolean => {
@@ -92,9 +92,9 @@ const resolveNext = (
 
             // if another rule could have been selected
             if (res.ruleIndex < rules.length - 1) {
-                stack.push({
-                    goals: [...goals, goal],
-                    depth: unifiers.length,
+                choices.push({
+                    goals: [...goals, goal].map(g => cloneTerm(g)),
+                    unifiersCount: unifiers.length,
                     nextRuleIndex: res.ruleIndex + 1
                 });
             }
@@ -149,19 +149,19 @@ export function* resolve(prog: Prog, goals: Fun[]): Iterable<Subst> {
 
     // start the search at the root of the proof tree
     // goals are in reverse order for O(1) append
-    const stack: Choice[] = [{ goals: [...goals].reverse(), depth: 0, nextRuleIndex: 0 }];
+    const choices: Choice[] = [{ goals: [...goals].reverse(), unifiersCount: 0, nextRuleIndex: 0 }];
 
     // keep backtracking until a solution is found
-    while (stack.length > 0) {
-        const { goals, nextRuleIndex, depth } = stack.pop() as Choice;
+    while (choices.length > 0) {
+        const { goals, nextRuleIndex, unifiersCount } = choices.pop() as Choice;
         // only keep unifiers that haven't been ruled out yet
-        trimArray(unifiers, depth);
+        trimArray(unifiers, unifiersCount);
 
         const succeeded = resolveNext(
             prog,
             goals,
             nextRuleIndex,
-            stack,
+            choices,
             unifiers
         );
 
