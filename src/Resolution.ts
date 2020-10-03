@@ -3,10 +3,10 @@ import { Prog, renameVars, Rule } from "./Rule.ts";
 import { cloneTerm, Fun } from './Term.ts';
 import { showTerm, vars } from "./Term.ts";
 import {
+    showSubst,
     Subst,
     substEq,
     substitute,
-    substituteMut,
     unify
 } from "./Unification.ts";
 
@@ -55,6 +55,7 @@ const trace = (
     );
 
     console.log(head + (body.length > 0 ? ` :- ${body.map(t => showTerm(substitute(t, subst))).join(', ')}.` : '.'));
+    console.log(showSubst(subst));
 };
 
 const resolveNext = (
@@ -119,7 +120,7 @@ const resolveNext = (
 
             // apply the unifier to all remaining goals
             for (let i = 0; i < goals.length; i++) {
-                goals[i] = substituteMut(goals[i], res.subst);
+                goals[i] = substitute(goals[i], res.subst);
             }
         } else {
             return false;
@@ -177,7 +178,8 @@ export function* resolve(prog: Prog, goals: Fun[]): Iterable<Subst> {
             nextRuleIndex,
             choices,
             unifiers,
-            [0]
+            [0],
+            false
         );
 
         if (succeeded) {

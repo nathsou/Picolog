@@ -150,3 +150,39 @@ Deno.test('flatten', () => {
 
     runSuite(prog, tests);
 });
+
+Deno.test('binary', () => {
+    const prog = okOrThrow(parse(`
+        digit(0).
+        digit(1).
+        
+        digits([]).
+        digits([H|T]) :- digit(H), digits(T).
+        
+        lss(0, s(_)).
+        lss(s(A), s(B)) :- lss(A, B).
+
+        len(0, []).
+        len(s(L), [_|TL]) :- len(L, TL).
+        
+        binary(Len, Num) :- len(Len, Num), digits(Num).
+`, program));
+
+    const tests: Array<[string, string[]]> = [
+        ['digit(0).', ['true.']],
+        ['digit(1).', ['true.']],
+        ['digit(2).', ['false.']],
+        ['binary(s(s(s(0))), B).', [
+            'B = [0, 0, 0]',
+            'B = [0, 0, 1]',
+            'B = [0, 1, 0]',
+            'B = [0, 1, 1]',
+            'B = [1, 0, 0]',
+            'B = [1, 0, 1]',
+            'B = [1, 1, 0]',
+            'B = [1, 1, 1]'
+        ]],
+    ];
+
+    runSuite(prog, tests);
+});
