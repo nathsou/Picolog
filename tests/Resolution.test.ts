@@ -21,7 +21,7 @@ const take = <T>(count: number, it: Iterable<T>): T[] => {
 const runSuite = (prog: Prog, tests: Array<[string, string[]]>): void => {
     for (const [q, expected] of tests) {
         const goals = okOrThrow(parse(q, query));
-        const results = take(expected.length, resolve(prog, goals)).map(formatAnswer);
+        const results = take(expected.length, resolve(prog, goals)).map(s => formatAnswer(s).split('\n').join(', '));
         if (results.length === 0) {
             assertEquals(expected, ['false.']);
         } else {
@@ -92,10 +92,10 @@ Deno.test('append', () => {
         ['append(A, [4, 5, 6], [1, 2, 3, 4, 5, 6]).', ['A = [1, 2, 3]']],
         ['append([1, 2, 3], B, [1, 2, 3, 4, 5, 6]).', ['B = [4, 5, 6]']],
         ['append(A, B, [1, 2, 3]).', [
-            'A = []\nB = [1, 2, 3]',
-            'A = [1]\nB = [2, 3]',
-            'A = [1, 2]\nB = [3]',
-            'A = [1, 2, 3]\nB = []'
+            'A = [], B = [1, 2, 3]',
+            'A = [1], B = [2, 3]',
+            'A = [1, 2], B = [3]',
+            'A = [1, 2, 3], B = []'
         ]]
     ];
 
@@ -182,6 +182,23 @@ Deno.test('binary', () => {
             'B = [1, 1, 0]',
             'B = [1, 1, 1]'
         ]],
+        ['binary(L, B).', [
+            'L = 0, B = []',
+            'L = s(0), B = [0]',
+            'L = s(0), B = [1]',
+            'L = s(s(0)), B = [0, 0]',
+            'L = s(s(0)), B = [0, 1]',
+            'L = s(s(0)), B = [1, 0]',
+            'L = s(s(0)), B = [1, 1]',
+            'L = s(s(s(0))), B = [0, 0, 0]',
+            'L = s(s(s(0))), B = [0, 0, 1]',
+            'L = s(s(s(0))), B = [0, 1, 0]',
+            'L = s(s(s(0))), B = [0, 1, 1]',
+            'L = s(s(s(0))), B = [1, 0, 0]',
+            'L = s(s(s(0))), B = [1, 0, 1]',
+            'L = s(s(s(0))), B = [1, 1, 0]',
+            'L = s(s(s(0))), B = [1, 1, 1]'
+        ]]
     ];
 
     runSuite(prog, tests);
