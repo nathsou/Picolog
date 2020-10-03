@@ -1,5 +1,6 @@
 import { Maybe, None } from "./Maybe.ts";
-import { Fun, funOf, isVar, showTerm, Term, termsEq, Var } from "./Term.ts";
+import { funOf, isVar, showTerm, Term, termsEq, Var } from "./Term.ts";
+import type { Fun } from "./Term.ts";
 
 /**
  * a type to represent substitutions
@@ -7,11 +8,14 @@ import { Fun, funOf, isVar, showTerm, Term, termsEq, Var } from "./Term.ts";
  */
 export type Subst = { [key: string]: Term };
 
+export function substituteMut(x: Var, sig: Subst): Term;
+export function substituteMut(f: Fun, sig: Subst): Fun;
 /**
  * replaces variables by their bound value in sig if any,
  * mutates the arguments of compound terms in place
  */
-export const substituteMut = (t: Term, sig: Subst): Term => {
+export function substituteMut(t: Term, sig: Subst): Term;
+export function substituteMut(t: Term, sig: Subst): Term {
     if (isVar(t)) {
         if (sig[t] !== undefined) {
             const t_ = substituteMut(sig[t], sig);
@@ -27,7 +31,7 @@ export const substituteMut = (t: Term, sig: Subst): Term => {
     }
 
     return t;
-};
+}
 
 export function substitute(x: Var, sig: Subst): Term;
 export function substitute(f: Fun, sig: Subst): Fun;
@@ -41,6 +45,7 @@ export function substitute(
 ): Term {
     if (isVar(t)) {
         if (sig[t] !== undefined) {
+            // link connected substitutions directly
             const t_ = substitute(sig[t], sig);
             sig[t] = t_;
             return t_;

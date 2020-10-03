@@ -74,7 +74,7 @@ export function* lex(input: string): Iterable<Result<Token, LexerError>> {
             continue;
         }
 
-        if (/[a-z0-9]/.test(cur)) {
+        if (/[a-z0-9!]/.test(cur)) {
             let f = '';
             do {
                 f += current();

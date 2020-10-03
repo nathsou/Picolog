@@ -6,7 +6,7 @@ export type Var = string;
 /**
  * the type of functors
  */
-export type Fun = { name: string; args: Term[] };
+export type Fun = { name: string, args: Term[] };
 
 /**
  * a term is either a variable or a functor

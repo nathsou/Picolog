@@ -2,13 +2,13 @@
 last(X, [X]).
 last(X, [_|TL]) :- last(X, TL).
 
-% length(0, []).
-% length(s(L), [_|TL]) :- length(L, TL).
+len(0, []).
+len(s(L), [_|TL]) :- len(L, TL).
 
 second_to_last(X, [X|[_]]).
 second_to_last(X, [_|TL]) :- second_to_last(X, TL).
 
-nth(X, [X|_], 0).
+nth(X, [X|_], s(0)).
 nth(X, [_|TL], s(N)) :- nth(X, TL, N).
 
 reverse(R, [], R).
@@ -26,8 +26,9 @@ is_list([_|T]) :- is_list(T).
 append([], Bs, Bs).
 append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).
 
+not(Goal) :- Goal, !, fail.
+not(_).
 
-flatten(X, [X]).
+flatten(X, [X]) :- not(is_list(X)).
 flatten([], []).
 flatten([As|Bs], Flat) :- flatten(As, As2), flatten(Bs, Bs2), append(As2, Bs2, Flat).
-% flatten([X|Xs],Zs) :- flatten(X,Y), flatten(Xs,Ys), append(Y,Ys,Zs).

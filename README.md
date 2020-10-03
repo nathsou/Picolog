@@ -11,6 +11,8 @@ Picolog is available on [deno.land](https://deno.land/x/pico)
 
 ### Usage
 
+See the [documentation](https://doc.deno.land/https/deno.land/x/pico/mod.ts)
+
 To launch the REPL:
 
 ```bash
@@ -24,8 +26,8 @@ To embed in a project :
 ```typescript
 import {
     resolve, parse, program, query,
-    isOk, formatComputedAnswer
-} from './src/Lib.ts';
+    isOk, formatAnswer
+} from 'https://deno.land/x/pico/mod.ts';
 
 const prog = parse(`
     append([], Bs, Bs).
@@ -41,7 +43,7 @@ if (isOk(prog) && isOk(goals)) {
     for (const answer of solutions) {
         // answer maps free variables from the query
         // to values satisfying the rules
-        console.log(formatComputedAnswer(answer));
+        console.log(formatAnswer(answer));
     }
 }
 
@@ -61,8 +63,8 @@ if (isOk(prog) && isOk(goals)) {
 
 ### Todo
 
-- [ ] support the cut operator
+- [x] support the cut operator
 - [ ] support arithmetic expressions
 - [ ] add modules
 - [ ] add a trace mode
-- [ ] compile to WAM for better performance?
+- [ ] compile to [WAM](https://www.wikiwand.com/fr/Warren%27s_Abstract_Machine) for better performance?

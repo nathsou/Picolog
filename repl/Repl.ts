@@ -1,10 +1,11 @@
 import type { LexerError } from "../src/Parser/Lexer.ts";
 import { parse, ParserError, program, query } from "../src/Parser/Parser.ts";
-import { formatComputedAnswer, resolve } from "../src/Resolution.ts";
+import { formatAnswer, resolve } from "../src/Resolution.ts";
 import { isError, okOrThrow, Result } from "../src/Result.ts";
 import type { Prog } from "../src/Rule.ts";
 import type { Fun } from "../src/Term.ts";
 import { TTYManager } from "./TTYManager.ts";
+import { red, bold } from "https://deno.land/std@0.71.0/fmt/colors.ts";
 
 const printUsage = () => {
     console.info(`usage: picolog src.pl [query]`);
@@ -34,8 +35,8 @@ const repl = async (prog: Prog): Promise<void> => {
 
         while (!next.done) {
             foundAnswer = true;
-            const out = formatComputedAnswer(next.value);
-            await writeln(out);
+            const out = formatAnswer(next.value);
+            await writeln(out === 'true.' ? bold(out) : out);
             if (out === 'true.') break;
 
             // look for more answers
@@ -45,7 +46,7 @@ const repl = async (prog: Prog): Promise<void> => {
         }
 
         if (!foundAnswer) {
-            await writeln('false.');
+            await writeln(bold(red('false.')));
         }
     }
 };
@@ -63,7 +64,7 @@ const runQuery = (path: string, query: string): void => {
     const prog = okOrThrow(parseProgram(path));
     const q = okOrThrow(parseQuery(query));
     const solutions = resolve(prog, q)[Symbol.iterator]();
-    console.log(formatComputedAnswer(solutions.next().value));
+    console.log(formatAnswer(solutions.next().value));
 };
 
 switch (Deno.args.length) {

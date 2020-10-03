@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.71.0/testing/asserts.ts";
 import { parse, program, query } from "../src/Parser/Parser.ts";
-import { formatComputedAnswer, resolve } from "../src/Resolution.ts";
+import { formatAnswer, resolve } from "../src/Resolution.ts";
 import { okOrThrow } from "../src/Result.ts";
 import type { Prog } from "../src/Rule.ts";
 import { Fun, funOf, showTerm } from "../src/Term.ts";
@@ -21,7 +21,7 @@ const take = <T>(count: number, it: Iterable<T>): T[] => {
 const runSuite = (prog: Prog, tests: Array<[string, string[]]>): void => {
     for (const [q, expected] of tests) {
         const goals = okOrThrow(parse(q, query));
-        const results = take(expected.length, resolve(prog, goals)).map(formatComputedAnswer);
+        const results = take(expected.length, resolve(prog, goals)).map(formatAnswer);
         if (results.length === 0) {
             assertEquals(expected, ['false.']);
         } else {
@@ -84,8 +84,8 @@ Deno.test('reverse', () => {
 
 Deno.test('append', () => {
     const prog = okOrThrow(parse(`
-    append([], Bs, Bs).
-    append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).
+        append([], Bs, Bs).
+        append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).
 `, program));
 
     const tests: Array<[string, string[]]> = [
@@ -97,6 +97,55 @@ Deno.test('append', () => {
             'A = [1, 2]\nB = [3]',
             'A = [1, 2, 3]\nB = []'
         ]]
+    ];
+
+    runSuite(prog, tests);
+});
+
+Deno.test('not', () => {
+    const prog = okOrThrow(parse(`
+        not(Goal) :- Goal, !, fail.
+        not(_).
+
+        blue(sky).
+        blue(sea).
+        white(clouds).
+        yellow(sun).
+`, program));
+
+    const tests: Array<[string, string[]]> = [
+        ['not(false).', ['true.']],
+        ['not(true).', ['false.']],
+        ['not(white(sky)).', ['true.']],
+        ['not(blue(sky)).', ['false.']],
+    ];
+
+    runSuite(prog, tests);
+});
+
+Deno.test('flatten', () => {
+    const prog = okOrThrow(parse(`
+        is_list([]).
+        is_list([_|T]) :- is_list(T).
+        
+        append([], Bs, Bs).
+        append([A|As], Bs, [A|ABs]) :- append(As, Bs, ABs).
+        
+        not(Goal) :- Goal, !, fail.
+        not(_).
+        
+        flatten(X, [X]) :- not(is_list(X)).
+        flatten([], []).
+        flatten([As|Bs], Flat) :- flatten(As, As2), flatten(Bs, Bs2), append(As2, Bs2, Flat).
+`, program));
+
+    const tests: Array<[string, string[]]> = [
+        ['flatten([a], X).', ['X = [a]']],
+        ['flatten([a, b], X).', ['X = [a, b]']],
+        ['flatten([a, [b]], X).', ['X = [a, b]']],
+        ['flatten([[[a]], [[[b]]]], X).', ['X = [a, b]']],
+        ['flatten([a, [b, [c, d], e]], X).', ['X = [a, b, c, d, e]']],
+        ['flatten([[[a], [[b]]], [[c, [d]], [[[e]]]]], X).', ['X = [a, b, c, d, e]']],
     ];
 
     runSuite(prog, tests);

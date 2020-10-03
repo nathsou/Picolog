@@ -2,7 +2,7 @@ import { assert } from "https://deno.land/std@0.71.0/testing/asserts.ts";
 import { isSome } from "../src/Maybe.ts";
 import { functor, parse, term } from "../src/Parser/Parser.ts";
 import { okOrThrow } from "../src/Result.ts";
-import { Fun } from "../src/Term.ts";
+import type { Fun } from "../src/Term.ts";
 import { Subst, substEq, unify } from "../src/Unification.ts";
 
 const substOf = (bindings: { [key: string]: string }): Subst => {
