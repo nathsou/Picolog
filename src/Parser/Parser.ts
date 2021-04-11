@@ -40,7 +40,7 @@ const current = ({ tokens, pos }: ParserState): Maybe<Token> => {
 };
 
 const then = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> => state => {
-    return bind(a(state), resA => bind(b(state), resB => ok([resA, resB])));
+    return bind(a(state), resA => bind(b(state), resB => ok<[A, B]>([resA, resB])));
 };
 
 const alt = <T>(a: Parser<T>, b: Parser<T>): Parser<T> => state => {

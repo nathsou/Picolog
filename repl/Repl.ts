@@ -5,7 +5,7 @@ import { isError, okOrThrow, Result } from "../src/Result.ts";
 import type { Prog } from "../src/Rule.ts";
 import type { Fun } from "../src/Term.ts";
 import { TTYManager } from "./TTYManager.ts";
-import { red, bold } from "https://deno.land/std@0.71.0/fmt/colors.ts";
+import { red, bold } from "https://deno.land/std@0.92.0/fmt/colors.ts";
 
 const printUsage = () => {
     console.info(`usage: picolog src.pl [query]`);

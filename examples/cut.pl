@@ -1,12 +1,13 @@
-a(X) :- b(X), !, c(X).
-a(X) :- d(X).
+% https://en.wikibooks.org/wiki/Prolog/Cuts_and_Negation
 
+a(X, Y) :- b(X), !, c(Y).
 b(1).
-b(4).
+b(2).
+b(3).
 
+c(1).
+c(2).
 c(3).
-
-d(4).
 
 % ?- a(Q, R).
 % Q = 1

@@ -16,7 +16,7 @@ See the [documentation](https://doc.deno.land/https/deno.land/x/pico/mod.ts)
 To launch the REPL:
 
 ```bash
-deno run --allow-read --allow-env --unstable https://deno.land/x/pico/repl/Repl.ts src.pl
+deno run -A --unstable https://deno.land/x/pico/repl/Repl.ts src.pl
 ```
 
 the --unstable flag is needed since Deno.setRaw (used by the REPL) is a new API.

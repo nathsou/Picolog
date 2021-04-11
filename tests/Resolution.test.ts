@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.71.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.92.0/testing/asserts.ts";
 import { parse, program, query } from "../src/Parser/Parser.ts";
 import { formatAnswer, resolve } from "../src/Resolution.ts";
 import { okOrThrow } from "../src/Result.ts";
@@ -96,6 +96,29 @@ Deno.test('append', () => {
             'A = [1], B = [2, 3]',
             'A = [1, 2], B = [3]',
             'A = [1, 2, 3], B = []'
+        ]]
+    ];
+
+    runSuite(prog, tests);
+});
+
+Deno.test('cut', () => {
+    const prog = okOrThrow(parse(`
+        a(X, Y) :- b(X), !, c(Y).
+        b(1).
+        b(2).
+        b(3).
+        
+        c(1).
+        c(2).
+        c(3).
+    `, program));
+
+    const tests: Array<[string, string[]]> = [
+        ['a(Q, R).', [
+            'Q = 1, R = 1',
+            'Q = 1, R = 2',
+            'Q = 1, R = 3'
         ]]
     ];
 

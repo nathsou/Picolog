@@ -45,7 +45,7 @@ export function* lex(input: string): Iterable<Result<Token, LexerError>> {
 
         if (singleCharTokens.has(cur)) {
             const type = singleCharTokens.get(cur) as SingleCharToken['type'];
-            yield ok({ type, ...pos });
+            yield ok<Token>({ type, ...pos });
             advance();
             continue;
         }
@@ -53,7 +53,7 @@ export function* lex(input: string): Iterable<Result<Token, LexerError>> {
         if (cur === ':') {
             advance();
             if (current() === '-') {
-                yield ok({ type: "leftarrow", ...pos });
+                yield ok<Token>({ type: "leftarrow", ...pos });
                 advance();
                 continue;
             }
@@ -70,7 +70,7 @@ export function* lex(input: string): Iterable<Result<Token, LexerError>> {
                 varName = `__${pos.line}_${pos.column}`;
             }
 
-            yield ok({ type: 'variable', name: varName, ...pos });
+            yield ok<Token>({ type: 'variable', name: varName, ...pos });
             continue;
         }
 
@@ -81,7 +81,7 @@ export function* lex(input: string): Iterable<Result<Token, LexerError>> {
                 advance();
             } while (/[a-zA-Z0-9_]/.test(current() ?? ''));
 
-            yield ok({ type: 'functor', name: f, ...pos });
+            yield ok<Token>({ type: 'functor', name: f, ...pos });
             continue;
         }
 

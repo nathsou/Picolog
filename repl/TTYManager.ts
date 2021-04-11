@@ -1,5 +1,5 @@
-import { Keypress, readKeypress } from "https://deno.land/x/keypress@0.0.4/mod.ts";
-import { clearLine, clearScreen, goLeft, goRight, goTo, nextLine } from "https://denopkg.com/iamnathanj/cursor@v2.0.0/mod.ts";
+import { Keypress, readKeypress } from "https://deno.land/x/keypress@0.0.7/mod.ts";
+import { clearLine, clearScreen, goLeft, goRight, goTo, nextLine } from "https://denopkg.com/iamnathanj/cursor@v2.2.0/mod.ts";
 import { isSome, Maybe } from "../src/Maybe.ts";
 
 export class TTYManager {

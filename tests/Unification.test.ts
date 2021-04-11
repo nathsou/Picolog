@@ -1,4 +1,4 @@
-import { assert } from "https://deno.land/std@0.71.0/testing/asserts.ts";
+import { assert } from "https://deno.land/std@0.92.0/testing/asserts.ts";
 import { isSome } from "../src/Maybe.ts";
 import { functor, parse, term } from "../src/Parser/Parser.ts";
 import { okOrThrow } from "../src/Result.ts";
